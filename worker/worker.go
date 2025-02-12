@@ -13,6 +13,7 @@ const coordinatorAddr = "localhost:5000"
 
 type Worker struct{}
 
+// Adding a function tot the Worker struct. Simply calls the neccessary operation function
 func (w *Worker) PerformOperation(req proto.MatrixRequest, res *proto.MatrixResponse) error {
 	var result shared.Matrix
 	var err error
@@ -38,14 +39,14 @@ func (w *Worker) PerformOperation(req proto.MatrixRequest, res *proto.MatrixResp
 }
 
 func registerWithCoordinator(workerAddr string) {
-	client, err := rpc.Dial("tcp", coordinatorAddr)
+	client, err := rpc.Dial("tcp", coordinatorAddr) // establish connection with coordinator
 	if err != nil {
 		log.Fatal("Failed to establish a connection with the coordinator:", err)
 	}
 	defer client.Close()
 
 	var reply string
-	err = client.Call("Coordinator.RegisterWorker", workerAddr, &reply)
+	err = client.Call("Coordinator.RegisterWorker", workerAddr, &reply) // When conn established, call the coordinators function to register it
 	if err != nil {
 		log.Fatal("Error registering with the coordinator:", err)
 	}
@@ -57,17 +58,18 @@ func main() {
 	worker := new(Worker)
 	rpc.Register(worker)
 
-	listener, err := net.Listen("tcp", "localhost:0")
+	listener, err := net.Listen("tcp", "localhost:0") // localhost 0 so that it opens on a random port
 	if err != nil {
 		log.Fatal("Error starting up a worker server:", err)
 	}
 	defer listener.Close()
 
-	workerAddr := listener.Addr().String()
-	registerWithCoordinator(workerAddr)
+	workerAddr := listener.Addr().String() // getting the worker address and port
+	registerWithCoordinator(workerAddr)    // register it with the coordinator
 
 	log.Printf("Worker server started on port %s...\n", workerAddr)
 
+	// open connection in an infinite loop to handle all possible requests from the client
 	for {
 		conn, err := listener.Accept()
 		if err != nil {

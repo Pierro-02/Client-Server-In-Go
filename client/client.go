@@ -10,7 +10,7 @@ import (
 )
 
 // Address of the coordinator / where coordinator is listeneing
-const coordinatorAddr = "localhost:5000"
+const coordinatorAddr = "172.16.60.92:5000"
 
 func main() {
 

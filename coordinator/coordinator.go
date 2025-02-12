@@ -102,7 +102,7 @@ func main() {
 	rpc.Register(coordinator) // registering it as rpc
 
 	// Opening connection on port 5000
-	listener, err := net.Listen("tcp", ":5000")
+	listener, err := net.Listen("tcp", "172.16.60.92:5000")
 	if err != nil {
 		log.Fatal("Coordinator error:", err)
 	}

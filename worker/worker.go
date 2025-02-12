@@ -9,7 +9,7 @@ import (
 	"net/rpc"
 )
 
-const coordinatorAddr = "localhost:5000"
+const coordinatorAddr = "172.16.60.92:5000"
 
 type Worker struct{}
 
@@ -58,7 +58,8 @@ func main() {
 	worker := new(Worker)
 	rpc.Register(worker)
 
-	listener, err := net.Listen("tcp", "localhost:0") // localhost 0 so that it opens on a random port
+	listener, err := net.Listen("tcp", ":0") // listens on a random free port
+
 	if err != nil {
 		log.Fatal("Error starting up a worker server:", err)
 	}

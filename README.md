@@ -31,6 +31,6 @@
 - First run the coordinator
   - `go run coordinator/coordinator.go`
 - Then run as many worker nodes as you want
-  - `go run worker/worker.go worker/matrix.go` (To run a single worker)
+  - `go run worker/worker.go worker/matrix_ops.go` (To run a single worker)
 - Finally run the client
   - `go run client/client.go`

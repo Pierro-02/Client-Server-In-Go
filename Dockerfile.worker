@@ -1,0 +1,14 @@
+FROM golang:latest
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+# RUN go mod download
+
+COPY . .
+
+RUN go build -o workr ./worker/worker.go ./worker/matrix_ops.go
+
+EXPOSE 5001
+
+CMD ["./workr"]

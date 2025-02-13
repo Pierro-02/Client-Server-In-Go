@@ -1,0 +1,18 @@
+services:
+  coordinator:
+    build:
+      context: .
+      dockerfile: Dockerfile.coordinator
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./tls:/app/tls
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    ports:
+      - "5001"
+    depends_on:
+      - coordinator

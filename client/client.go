@@ -3,6 +3,7 @@ package main
 import (
 	"client_server/proto"
 	"client_server/shared"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net/rpc"
@@ -10,17 +11,21 @@ import (
 )
 
 // Address of the coordinator / where coordinator is listeneing
-const coordinatorAddr = "172.16.60.92:5000"
+const coordinatorAddr = "0.0.0.0:5000"
 
 func main() {
+	tlsConfig := &tls.Config{InsecureSkipVerify: true}
 
 	// client making a rpc connection with the coordinator
-	client, err := rpc.Dial("tcp", coordinatorAddr)
+	conn, err := tls.Dial("tcp", coordinatorAddr, tlsConfig)
 	if err != nil {
-		log.Fatal("Client couldn't establish a connection with the coordinator:", err)
+		log.Fatal("TLS connection error:", err)
 	}
 	// when the main function ends, close the connection
-	defer client.Close()
+	defer conn.Close()
+
+	//Create and RPC client over the secure tls connection
+	client := rpc.NewClient(conn)
 
 	// Making 3 matrices
 	mat1 := shared.Matrix{Rows: 2, Cols: 2, Data: [][]int{{2, 2}, {3, 4}}}
@@ -54,7 +59,7 @@ func main() {
 	request := func(req proto.MatrixRequest, res *proto.MatrixResponse) {
 		err = client.Call("Coordinator.RequestComputation", req, res)
 		if err != nil {
-			log.Fatal("RPC error with request 1:", err)
+			log.Fatal("RPC error with request:", err)
 		}
 
 		fmt.Println("Computed Answer:")

@@ -3,18 +3,20 @@ package main
 import (
 	"client_server/proto"
 	"client_server/shared"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net"
 	"net/rpc"
 )
 
-const coordinatorAddr = "172.16.60.92:5000"
+const coordinatorAddr = "0.0.0.0:5000"
 
 type Worker struct{}
 
 // Adding a function tot the Worker struct. Simply calls the neccessary operation function
 func (w *Worker) PerformOperation(req proto.MatrixRequest, res *proto.MatrixResponse) error {
+	log.Println("Getting Ready to perform operation...")
 	var result shared.Matrix
 	var err error
 
@@ -39,11 +41,15 @@ func (w *Worker) PerformOperation(req proto.MatrixRequest, res *proto.MatrixResp
 }
 
 func registerWithCoordinator(workerAddr string) {
-	client, err := rpc.Dial("tcp", coordinatorAddr) // establish connection with coordinator
+	tlsConfig := &tls.Config{InsecureSkipVerify: true}
+
+	conn, err := tls.Dial("tcp", coordinatorAddr, tlsConfig) // establish connection with coordinator
 	if err != nil {
-		log.Fatal("Failed to establish a connection with the coordinator:", err)
+		log.Fatal("Worker failed to connect via TLS:", err)
 	}
-	defer client.Close()
+	defer conn.Close()
+
+	client := rpc.NewClient(conn)
 
 	var reply string
 	err = client.Call("Coordinator.RegisterWorker", workerAddr, &reply) // When conn established, call the coordinators function to register it
@@ -77,6 +83,7 @@ func main() {
 			log.Println("Connection error:", err)
 			continue
 		}
+		log.Println()
 		go rpc.ServeConn(conn)
 	}
 }

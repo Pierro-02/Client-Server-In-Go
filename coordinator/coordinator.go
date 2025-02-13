@@ -1,9 +1,9 @@
 package main
 
 import (
+	"crypto/tls"
 	"errors"
 	"log"
-	"net"
 	"net/rpc"
 	"sync"
 
@@ -98,17 +98,24 @@ func (c *Coordinator) handleWorkerFailure(workerAddr string) {
 
 func main() {
 	// Initialising the coordinator struct
+	cert, err := tls.LoadX509KeyPair("tls/tls_cert.pem", "tls/tls_key.pem")
+	if err != nil {
+		log.Fatal("Failed to load TLS certificate:", err)
+	}
+
+	tlsConfig := &tls.Config{Certificates: []tls.Certificate{cert}}
+
 	coordinator := &Coordinator{workers: make(map[string]int)}
 	rpc.Register(coordinator) // registering it as rpc
 
 	// Opening connection on port 5000
-	listener, err := net.Listen("tcp", "172.16.60.92:5000")
+	listener, err := tls.Listen("tcp", "0.0.0.0:5000", tlsConfig)
 	if err != nil {
 		log.Fatal("Coordinator error:", err)
 	}
 	defer listener.Close() // close conn when function ends
 
-	log.Print("Coordinator running on port 5000...")
+	log.Print("Coordinator running with TLS on port 5000...")
 
 	// Infinite function to accept accept connection requests and handle them in go routines
 	for {

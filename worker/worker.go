@@ -14,6 +14,11 @@ const coordinatorAddr = "0.0.0.0:5000"
 
 type Worker struct{}
 
+func (w *Worker) Ping(_ struct{}, reply *string) error {
+	*reply = "pong"
+	return nil
+}
+
 // Adding a function tot the Worker struct. Simply calls the neccessary operation function
 func (w *Worker) PerformOperation(req proto.MatrixRequest, res *proto.MatrixResponse) error {
 	log.Println("Getting Ready to perform operation...")
